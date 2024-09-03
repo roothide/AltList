@@ -1,5 +1,7 @@
 ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
 TARGET := iphone:clang:16.2:15.0
+else ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
+TARGET := iphone:clang:16.2:15.0
 else
 TARGET := iphone:clang:14.5:7.0
 endif
@@ -14,11 +16,14 @@ AltList_INSTALL_PATH = /Library/Frameworks
 AltList_CFLAGS = -fobjc-arc -Wno-tautological-pointer-compare
 ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
 AltList_LDFLAGS += -install_name @rpath/AltList.framework/AltList
+else ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
+AltList_LDFLAGS += -install_name @loader_path/.jbroot/Library/Frameworks/AltList.framework/AltList
 endif
 AltList_FRAMEWORKS = MobileCoreServices
 AltList_PRIVATE_FRAMEWORKS = Preferences
 
 after-AltList-stage::
+	@mkdir -p $(THEOS_STAGING_DIR)/Library/PreferenceBundles/
 	@ln -s $(THEOS_PACKAGE_INSTALL_PREFIX)/Library/Frameworks/AltList.framework $(THEOS_STAGING_DIR)/Library/PreferenceBundles/AltList.bundle
 
 include $(THEOS_MAKE_PATH)/framework.mk
